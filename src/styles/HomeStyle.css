@@ -1,0 +1,21 @@
+.first-section{
+    position: relative;
+        padding-top: 120px;
+        padding-bottom: 90px;
+}
+
+.phone-no{
+  width: 35%;
+}
+.full-width-section {
+    background-image: url(../../src/assets/logo2.svg);
+    color: white;
+    width: 100vw; /* Full window width */
+    height: 100vh; /* Full window height */
+    display: flex;
+    align-items: center;
+  }
+  
+  .testimonials-section{
+    background-color: rgb(158, 243, 233);
+  }

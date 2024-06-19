@@ -11,20 +11,7 @@ header .navbar.sticky{
     position: fixed;
     left: 0;
     top: 0;
-    background-color: var(--white);
-    -webkit-transform: all 15ms ease-in-out;
-    -moz-transform: all 15ms ease-in-out ;
-    -o-transform: all 15ms ease-in-out ;
-    -ms-transform: all 15ms ease-in-out ;
-    transform: all 15ms ease-in-out ;
-    animation-name: stickyTransmition;
-    -webkit-animation-duration: 0.5s;
-    animation-duration: 0.5s;
-    -webkit-animation-duration: 0.5s;
-    animation-fill-mode: both;
-    -webkit-box-shadow:0 2px 3px rgba(96, 96, 96, .1);
-    -moz-box-shadow:0 2px 3px rgba(96, 96, 96, .1);
-    box-shadow: 0 2px 3px rgba(96, 96, 96, .1);
+    background-color:  #e7f0f0;
 }
 
 @keyframes stickyTransmition{
@@ -54,11 +41,7 @@ header .logo img {
     font-weight: 500;
     font-family: var(--oswald-font);
     text-transform: uppercase;
-    -webkit-transition: all 15ms ease-in-out;
-    -ms-transition: all 15ms ease-in-out;
-    -o-transition: all 15ms ease-in-out;
-    -moz-transition: all 15ms ease-in-out;
-    transition: all 15ms ease-in-out;
+   
   }
   
   header .sticky .nav-link {
