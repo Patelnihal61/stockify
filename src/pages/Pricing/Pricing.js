@@ -1,46 +1,123 @@
-import React from "react";
-import "../../styles/Pricing.css"
+import React, { useEffect, useState } from "react";
+import "../../styles/Pricing.css";
 import Layout from "../../components/Layout";
+import { Card, Button, Container } from "react-bootstrap";
+import Transaction from "../Transaction/Transaction";
+
+const Pricing = () => {
+  const [stockData, setStockData] = useState([]);
+  const [balance, setBalance] = useState(10000);
+  const [error, setError] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+
+  const api_key = "cppfbopr01qi7uaihi6gcppfbopr01qi7uaihi70";
+  const symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NFLX", "NVDA"];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const requests = symbols.map(symbol =>
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${api_key}`)
+            .then(response => response.json())
+            .then(data => ({
+              symbol,
+              price: data.c,
+              logo: `${symbol.toLowerCase()}-logo.png`, // Placeholder for logos
+              chart: `${symbol.toLowerCase()}-chart.png` // Placeholder for charts
+            }))
+        );
+
+        const results = await Promise.all(requests);
+        setStockData(results);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
 
 
-export default function Pricing() {
+  const [ownedStocks, setOwnedStocks] = useState({}); // To track owned stocks and their amounts
 
-  const stockData = [
-    { name: "Apple", price: 145.09, chart: "apple-chart.png", logo: "apple-logo.png" },
-    { name: "Microsoft", price: 265.51, chart: "microsoft-chart.png", logo: "microsoft-logo.png" },
-    { name: "Google", price: 2734.87, chart: "google-chart.png", logo: "google-logo.png" },
-    { name: "Amazon", price: 3441.85, chart: "amazon-chart.png", logo: "amazon-logo.png" },
-    { name: "Facebook", price: 355.64, chart: "facebook-chart.png", logo: "facebook-logo.png" },
-    { name: "Tesla", price: 699.10, chart: "tesla-chart.png", logo: "tesla-logo.png" },
-    { name: "Netflix", price: 519.07, chart: "netflix-chart.png", logo: "netflix-logo.png" },
-    { name: "NVIDIA", price: 751.19, chart: "nvidia-chart.png", logo: "nvidia-logo.png" },
-];
+  const handleBuy = (stock) => {
+    if (balance >= stock.price) {
+      const transaction = {
+        id: transactions.length + 1,
+        date: new Date().toISOString().split('T')[0],
+        stock: stock.symbol,
+        amount: stock.price,
+        type: "Buy"
+      };
+      setTransactions([...transactions, transaction]);
+      setBalance(balance - stock.price);
+
+      // Update owned stocks
+      const updatedOwnedStocks = { ...ownedStocks };
+      if (updatedOwnedStocks[stock.symbol]) {
+        updatedOwnedStocks[stock.symbol] += stock.price;
+      } else {
+        updatedOwnedStocks[stock.symbol] = stock.price;
+      }
+      setOwnedStocks(updatedOwnedStocks);
+    } else {
+      alert("Insufficient balance!");
+    }
+  };
+
+  const handleSell = (stock) => {
+    const transaction = {
+      id: transactions.length + 1,
+      date: new Date().toISOString().split('T')[0],
+      stock: stock.symbol,
+      amount: stock.price,
+      type: "Sell"
+    };
+
+    // Check if user can sell this stock
+    if (ownedStocks[stock.symbol] && ownedStocks[stock.symbol] >= stock.price) {
+      setTransactions([...transactions, transaction]);
+      setBalance(balance + stock.price);
+
+      // Update owned stocks
+      const updatedOwnedStocks = { ...ownedStocks };
+      updatedOwnedStocks[stock.symbol] -= stock.price;
+      setOwnedStocks(updatedOwnedStocks);
+    } else {
+      alert(`You can't sell ${stock.symbol} as you haven't bought it previously or you don't have enough quantity.`);
+    }
+  };
 
   return (
     <>
       <Layout>
       <div className="pricing">
-      <div className="stock-cards-container">
-            {stockData.map((stock, index) => (
-                <div className="stock-card" key={index}>
-                    <div className="stock-header">
-                        <img src={stock.logo} alt={`${stock.name} logo`} className="stock-logo" />
-                        <h2>{stock.name}</h2>
+          <div className="balance-info">
+            <h3>Total Balance: ${balance.toFixed(2)}</h3>
+          </div>
+          <Container fluid>
+            <div className="stock-cards-container d-flex flex-wrap justify-content-center">
+              {stockData.map((stock, index) => (
+                <Card className="stock-card m-2" key={index}>
+                  <Card.Body>
+                    <div className="stock-header d-flex justify-content-between align-items-center">
+                      <h2>{stock.symbol}</h2>
+                      <p>Price: ${stock.price.toFixed(2)}</p>
                     </div>
-                    <p>Price: ${stock.price.toFixed(2)}</p>
-                    <div className="chart-placeholder">
-                        <img src={stock.chart} alt={`${stock.name} chart`} />
+                    <div className="button-group text-center mt-3">
+                      <Button variant="primary" onClick={() => handleBuy(stock)}>Buy</Button>
+                      <Button variant="danger" onClick={() => handleSell(stock)}>Sell</Button>
                     </div>
-                    <div className="button-group">
-                        <button className="btn btn-primary">Buy</button>
-                        <button className="btn btn-danger">Sell</button>
-                        <a href={stock.link}>See More...</a>
-                    </div>
-                </div>
-            ))}
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          </Container>
         </div>
-      </div>
+        <Transaction transactions={transactions} />
       </Layout>
     </>
   );
-}
+};
+
+export default Pricing;
